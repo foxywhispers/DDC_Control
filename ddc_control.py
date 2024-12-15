@@ -76,7 +76,7 @@ class DDC_Control(QWidget):
             slider.setMinimum(0)
             slider.setMaximum(100)
             slider.setValue(brightness)
-            perc_label = QLabel(str(brightness))
+            perc_label = QLabel(str(brightness) + "%")
             hbox.addWidget(label)
             hbox.addWidget(slider)
             hbox.addWidget(perc_label)
