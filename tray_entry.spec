@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['ddc_control.py'],
+    ['tray_entry.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('sun.png', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ddc_control',
+    name='tray_entry',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

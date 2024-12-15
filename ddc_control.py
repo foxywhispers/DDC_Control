@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QLineEdit, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QWidget, QMessageBox, QCheckBox
 from PyQt5.QtCore import Qt, QTimer
+from helpers import run_command, parse_brightness
 import subprocess, re
 
 class DDC_Control(QWidget):
@@ -123,35 +124,22 @@ class DDC_Control(QWidget):
 
             command = f"ddcutil --bus={bus_number} setvcp 10 {slider_value}"
 
-            try:
-                subprocess.run(command, shell=True, check=True)
-            except subprocess.CalledProcessError as e:
-                print(f"Error applying brightness to monitor {i + 1}: {e}")
+            run_command(command)
 
     def get_brightness(self, bus):
 
         command = f"ddcutil --bus={bus} getvcp 10"
         
-        try:
-            output = subprocess.check_output(command, shell=True, text=True)     
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
+        output = run_command(command)
 
-        found = re.search(r"current value\s*=\s*(\d+)", output)
-        if found:
-            return int(found.group(1)) 
-        else:
-            return null  
+        return parse_brightness(output)
 
 
     def auto_detect_monitors(self):      
 
         command = "ddcutil detect | grep bus"
 
-        try:
-            output = subprocess.check_output(command, shell=True, text=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")    
+        output = run_command(command)
 
         bus_numbers = []
         lines = output.splitlines()
@@ -160,8 +148,8 @@ class DDC_Control(QWidget):
 
             bus_numbers.append(int(x[-1]))
 
-
         return bus_numbers
+
 
     def show_help(self):
 

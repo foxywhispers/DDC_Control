@@ -1,0 +1,8 @@
+for tray app:
+
+pyinstaller --onefile --windowed --add-data "sun.png:." tray_entry.py
+
+
+for the windowed app:
+
+pyinstaller --onefile --windowed standalone_entry.py
