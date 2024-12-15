@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QLineEdit, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QWidget, QMessageBox, QCheckBox
 from PyQt5.QtCore import Qt, QTimer
-import subprocess
+import subprocess, re
 
 class DDC_Control(QWidget):
 
@@ -67,18 +67,27 @@ class DDC_Control(QWidget):
         for i, bus_number in enumerate(self.monitors):
 
             # Create Brightness slider for each monitor
+            
+            brightness = self.get_brightness(bus_number)
+
+            hbox = QHBoxLayout()
             label = QLabel(f"Brightness {i + 1}:")
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(0)
             slider.setMaximum(100)
-            slider.setValue(50)
-            self.layout.addWidget(label)
-            self.layout.addWidget(slider)
+            slider.setValue(brightness)
+            perc_label = QLabel(str(brightness) + "%")
+            hbox.addWidget(label)
+            hbox.addWidget(slider)
+            hbox.addWidget(perc_label)
+
+            self.layout.addLayout(hbox)
 
             setattr(self, f"slider{i + 1}", slider)
 
             # using slider starts timer so that commands are only run after adjustment is finished
-            slider.valueChanged.connect(lambda: self.start_timer())           
+            slider.valueChanged.connect(lambda: self.start_timer())  
+            slider.valueChanged.connect(lambda value, lbl=perc_label: lbl.setText(f"{value}%"))         
 
     def create_buttons(self, name):
 
@@ -118,6 +127,22 @@ class DDC_Control(QWidget):
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error applying brightness to monitor {i + 1}: {e}")
+
+    def get_brightness(self, bus):
+
+        command = f"ddcutil --bus={bus} getvcp 10"
+        
+        try:
+            output = subprocess.check_output(command, shell=True, text=True)     
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
+        found = re.search(r"current value\s*=\s*(\d+)", output)
+        if found:
+            return int(found.group(1)) 
+        else:
+            return null  
+
 
     def auto_detect_monitors(self):      
 
